@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Cobra Game Engine/Sparse_Set.cpp
+/Cobra Game Engine/Sparse_Set.h
+/Cobra Game Engine/testscene.h
+/Cobra Game Engine/testscene.cpp
+/Cobra Game Engine/Source.cpp
+/Cobra Game Engine/dragon.txt
+/Cobra Game Engine/cube.txt
+/Cobra Game Engine/CameraController.h
+/Cobra Game Engine/CameraController.cpp
+/Cobra Game Engine/Blank.png
