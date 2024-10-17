@@ -7,7 +7,7 @@ struct Component{
 
 };
 enum ColliderType {
-	Sphere,AABB,SAT
+	Sphere,OBB
 };
 
 struct MeshComponent:public Component {
@@ -64,19 +64,22 @@ struct SphereColliderComponent :public ColliderComponent {
 	}
 };
 
-struct AABBColliderComponent :public ColliderComponent {
-	
+struct OBBColliderComponent :public ColliderComponent {
 	glm::vec3 offset;
-	glm::vec3 dimensions;
-	AABBColliderComponent() {
-		type = AABB;
-	}
-};
-struct SATColliderComponent :public ColliderComponent {
-	glm::vec3 offset;
-	std::vector<glm::vec3>* verts;
-	SATColliderComponent() {
-		type = SAT;
+	glm::vec3 halfSize;
+	glm::vec3 vertsPoints[8];
+	glm::vec3 verts[8];
+	OBBColliderComponent(glm::vec3 hlfsze) {
+		type = OBB;
+		halfSize = hlfsze;
+		vertsPoints[0] = {-halfSize.x, -halfSize.y, -halfSize.z};
+		vertsPoints[1] = {halfSize.x, -halfSize.y, +halfSize.z};
+		vertsPoints[2] = { -halfSize.x, +halfSize.y, -halfSize.z};
+		vertsPoints[3] = {-halfSize.x, +halfSize.y, +halfSize.z};
+		vertsPoints[4] = {+halfSize.x, -halfSize.y, -halfSize.z};
+		vertsPoints[5] = {+halfSize.x, -halfSize.y, +halfSize.z};
+		vertsPoints[6] = {+halfSize.x, +halfSize.y, -halfSize.z};
+		vertsPoints[7] = {+halfSize.x, +halfSize.y, +halfSize.z};
 	}
 };
 
@@ -95,28 +98,6 @@ struct RigidBodyComponent :public Component {
 	inline void addTorque(glm::vec3 t) {
 		torque += t;
 	};
-	/*void calculateInertiaTensor(std::vector<Vertex>& points,glm::vec3 center) {
-		std::vector<glm::vec3> coords;
-		int s = points.size();
-		coords.reserve(points.size());
-		for (Vertex v : points) {
-			coords.push_back(v.position);
-		}
-		glm::mat3 I = { {0,0,0},{0,0,0},{0,0,0} };
-		for (glm::vec3 pos : coords) {
-			I[0][0] = (mass/s)*((pos[1]-center[1]) * (pos[1] - center[1]) + (pos[2] - center[2]) * (pos[2] - center[2]));
-			I[1][1] = (mass / s) *((pos[0] - center[0]) * (pos[0] - center[0]) + (pos[2] - center[2]) * (pos[2] - center[2]));
-			I[2][2] = (mass / s) *((pos[0] - center[0]) * (pos[0] - center[0]) + (pos[1] - center[1]) * (pos[1] - center[1]));
-			I[0][1] = (mass / s) * ((pos[0] - center[0]) * (pos[1] - center[1]));
-			I[1][2] = (mass / s) * ((pos[1] - center[1]) * (pos[2] - center[2]));
-			I[0][2] = (mass / s) * ((pos[0] - center[0]) * (pos[2] - center[2]));
-			I[1][0] = I[0][1];
-			I[2][1] = I[1][2];
-			I[2][0] = I[0][2];
-
-		}
-		Iinv = glm::inverse(I);
-	}*/
 
 };
 

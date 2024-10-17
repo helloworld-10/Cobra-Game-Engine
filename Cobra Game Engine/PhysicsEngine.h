@@ -21,14 +21,9 @@ private:
 		std::shared_ptr<SphereColliderComponent> c;
 		std::shared_ptr<TransformComponent> t;
 	};
-	struct AABBCollisionObject {
+	struct OBBCollisionObject {
 		entity e;
-		std::shared_ptr<AABBColliderComponent> c;
-		std::shared_ptr<TransformComponent> t;
-	};
-	struct SATCollisionObject {
-		entity e;
-		std::shared_ptr<SATColliderComponent> c;
+		std::shared_ptr<OBBColliderComponent> o;
 		std::shared_ptr<TransformComponent> t;
 	};
 	struct CollResponse {
@@ -43,6 +38,9 @@ private:
 	void detectCollisions(ComponentManager* manager);
 
 	void SphereSphere(SphereCollisionObject s1, SphereCollisionObject s2);
+	void OBBOBB(OBBCollisionObject o1, OBBCollisionObject o2);
+	glm::vec2 projectToAxis(OBBCollisionObject o, glm::vec3 axis);
+	bool isOverlaping(OBBCollisionObject o1, OBBCollisionObject o2, glm::vec3 axis);
 	void resolveCollisions(CollResponse c);
 	void collisionEvents();
 	

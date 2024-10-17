@@ -1315,11 +1315,10 @@
     </None>
     <None Include="frag.glsl" />
     <None Include="vertex.glsl" />
+    <None Include="x64\Debug\vertex.glsl" />
+    <None Include="x64\Debug\frag.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="glm\detail\glm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1347,14 +1346,21 @@
     <ClCompile Include="testscene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vendor\GLAD\src\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Blank.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="x64\Debug\Blank.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="cube.txt" />
     <Text Include="dragon.txt" />
+    <Text Include="x64\Debug\dragon.txt" />
   </ItemGroup>
 </Project>

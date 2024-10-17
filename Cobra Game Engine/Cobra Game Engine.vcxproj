@@ -569,6 +569,8 @@
     <None Include="glm\gtx\vector_query.inl" />
     <None Include="glm\gtx\wrap.inl" />
     <None Include="vertex.glsl" />
+    <None Include="x64\Debug\frag.glsl" />
+    <None Include="x64\Debug\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -584,10 +586,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Blank.png" />
+    <Image Include="x64\Debug\Blank.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="cube.txt" />
     <Text Include="dragon.txt" />
+    <Text Include="x64\Debug\dragon.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
