@@ -7,7 +7,7 @@ struct Component{
 
 };
 enum ColliderType {
-	Sphere,AABB,SAT
+	Sphere,OBB
 };
 
 struct MeshComponent:public Component {
@@ -20,9 +20,9 @@ struct MeshComponent:public Component {
 
 
 struct TransformComponent :public Component {
-	glm::vec3 position;
-	glm::vec3 scale;
-	glm::mat3 rotation = { {1,0,0},{0,1,0},{0,0,1} };
+	glm::vec3 position = {0,0,0};
+	glm::vec3 scale = {1,1,1};
+	glm::mat3 rotation = { {1.0f,0,0},{0,1.0f,0},{0,0,1.0f} };
 };
 
 
@@ -51,33 +51,39 @@ struct SpotlightComponent :public Component {
 	float outerCutoff;
 };
 
+struct SphereCollider {
+	float radius = 0;
+};
+struct OBBCollider {
+	glm::vec3 halfSize = {0,0,0};
+	glm::vec3 vertsPoints[8] = {};
+	glm::vec3 verts[8] = {};
+};
 struct ColliderComponent :Component{
-	ColliderType type;
+	ColliderType type = OBB;
 	bool isStatic = false;
-};
-struct SphereColliderComponent :public ColliderComponent {
-	
-	glm::vec3 offset;
-	float radius;
-	SphereColliderComponent() {
+	glm::vec3 offset = {};
+	union {
+		SphereCollider sphere;
+		OBBCollider obb;
+	};
+	ColliderComponent(glm::vec3 hlfsze) {
+		type = OBB;
+		obb.halfSize = hlfsze;
+		obb.vertsPoints[0] = { -obb.halfSize.x, -obb.halfSize.y, -obb.halfSize.z };
+		obb.vertsPoints[1] = { obb.halfSize.x, -obb.halfSize.y, +obb.halfSize.z };
+		obb.vertsPoints[2] = { -obb.halfSize.x, +obb.halfSize.y, -obb.halfSize.z };
+		obb.vertsPoints[3] = { -obb.halfSize.x, +obb.halfSize.y, +obb.halfSize.z };
+		obb.vertsPoints[4] = { +obb.halfSize.x, -obb.halfSize.y, -obb.halfSize.z };
+		obb.vertsPoints[5] = { +obb.halfSize.x, -obb.halfSize.y, +obb.halfSize.z };
+		obb.vertsPoints[6] = { +obb.halfSize.x, +obb.halfSize.y, -obb.halfSize.z };
+		obb.vertsPoints[7] = { +obb.halfSize.x, +obb.halfSize.y, +obb.halfSize.z };
+	}
+	ColliderComponent(float r) {
 		type = Sphere;
+		sphere.radius = r;
 	}
-};
 
-struct AABBColliderComponent :public ColliderComponent {
-	
-	glm::vec3 offset;
-	glm::vec3 dimensions;
-	AABBColliderComponent() {
-		type = AABB;
-	}
-};
-struct SATColliderComponent :public ColliderComponent {
-	glm::vec3 offset;
-	std::vector<glm::vec3>* verts;
-	SATColliderComponent() {
-		type = SAT;
-	}
 };
 
 struct RigidBodyComponent :public Component {
@@ -95,28 +101,6 @@ struct RigidBodyComponent :public Component {
 	inline void addTorque(glm::vec3 t) {
 		torque += t;
 	};
-	/*void calculateInertiaTensor(std::vector<Vertex>& points,glm::vec3 center) {
-		std::vector<glm::vec3> coords;
-		int s = points.size();
-		coords.reserve(points.size());
-		for (Vertex v : points) {
-			coords.push_back(v.position);
-		}
-		glm::mat3 I = { {0,0,0},{0,0,0},{0,0,0} };
-		for (glm::vec3 pos : coords) {
-			I[0][0] = (mass/s)*((pos[1]-center[1]) * (pos[1] - center[1]) + (pos[2] - center[2]) * (pos[2] - center[2]));
-			I[1][1] = (mass / s) *((pos[0] - center[0]) * (pos[0] - center[0]) + (pos[2] - center[2]) * (pos[2] - center[2]));
-			I[2][2] = (mass / s) *((pos[0] - center[0]) * (pos[0] - center[0]) + (pos[1] - center[1]) * (pos[1] - center[1]));
-			I[0][1] = (mass / s) * ((pos[0] - center[0]) * (pos[1] - center[1]));
-			I[1][2] = (mass / s) * ((pos[1] - center[1]) * (pos[2] - center[2]));
-			I[0][2] = (mass / s) * ((pos[0] - center[0]) * (pos[2] - center[2]));
-			I[1][0] = I[0][1];
-			I[2][1] = I[1][2];
-			I[2][0] = I[0][2];
-
-		}
-		Iinv = glm::inverse(I);
-	}*/
 
 };
 

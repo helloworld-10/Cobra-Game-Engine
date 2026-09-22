@@ -1,4 +1,6 @@
 #include "PhysicsEngine.h"
+#include <ext/matrix_transform.hpp>
+#include <gtc/quaternion.hpp>
 
 
 void PhysicsEngine::init()
@@ -65,49 +67,118 @@ void PhysicsEngine::getColliderComponents(ComponentManager* manager) {
 	colliders.reserve(colliderEntities.size());
 	for (entity e : colliderEntities) {
 		CollisionObject sp;
-		sp.e = e;
 		sp.c = (manager->getComponent<ColliderComponent>(e));
 		sp.t = (manager->getComponent<TransformComponent>(e));
-		colliders.push_back(sp);
+		
+		if (sp.c->type == OBB) {
+			
+			//glm::mat4 transform(1.0);
+			////glm::scale(transform, sp.t->scale);
+			//glm::translate(transform,sp.t->position);
+			//glm::quat q = glm::quat(sp.t->rotation);
+			//	transform *= glm::mat4_cast(q);
+				for (int i = 0; i < 8; i++) {
+					sp.c->obb.verts[i] = sp.t->position+sp.t->rotation*sp.c->obb.vertsPoints[i];
+				}
+
+			
+			colliders.push_back(sp);
+			
+		}
 	}
 }
 
 void PhysicsEngine::detectCollisions(ComponentManager* manager)
 {
-	
+
 	for (int i = 0; i < colliders.size(); i++) {
-		for (int j = i+1; j < colliders.size(); j++) {
+		for (int j = i + 1; j < colliders.size(); j++) {
 			if (colliders[i].c->type == Sphere && colliders[j].c->type == Sphere) {
-				SphereCollisionObject s1;
-				SphereCollisionObject s2;
-				s1.c = std::static_pointer_cast<SphereColliderComponent>(colliders[i].c);
+				CollisionObject s1;
+				CollisionObject s2;
+				s1.c = (colliders[i].c);
 				s1.t = colliders[i].t;
-				s2.c = std::static_pointer_cast<SphereColliderComponent>(colliders[j].c);
+				s2.c = (colliders[j].c);
 				s2.t = colliders[j].t;
 				SphereSphere(s1, s2);
 			}
-			
-			
+			if (colliders[i].c->type == OBB && colliders[j].c->type == OBB) {
+				CollisionObject s1;
+				CollisionObject s2;
+				s1.c = (colliders[i].c);
+				s1.t = colliders[i].t;
+				s2.c = (colliders[j].c);
+				s2.t = colliders[j].t;
+
+				OBBOBB(s1, s2);
+			}
+
 		}
-		
+
 	}
 }
 
-void PhysicsEngine::SphereSphere(SphereCollisionObject s1, SphereCollisionObject s2) {
-	float sum = s1.c->radius + s2.c->radius;
+void PhysicsEngine::SphereSphere(CollisionObject s1, CollisionObject s2) {
+	float sum = s1.c->sphere.radius + s2.c->sphere.radius;
 	if (glm::length(s1.t->position - s2.t->position) <= sum) {
 		glm::vec3 norm = glm::normalize(s1.t->position - s2.t->position);
 		float depth = sum - glm::length(s1.t->position - s2.t->position);
-		s1.t->position += norm * depth/2.0f;
-		s2.t->position += -norm * depth/2.0f;
+		s1.t->position += norm * depth / 2.0f;
+		s2.t->position += -norm * depth / 2.0f;
 
 	}
-	
+
+}
+
+void PhysicsEngine::OBBOBB(CollisionObject o1, CollisionObject o2)
+{
+	std::vector<glm::vec3> axes;
+	axes.reserve(15);
+	axes.push_back(o1.c->obb.verts[0]);
+	axes.push_back(o1.c->obb.verts[1]);
+	axes.push_back(o1.c->obb.verts[2]);
+	axes.push_back(o2.c->obb.verts[0]);
+	axes.push_back(o2.c->obb.verts[1]);
+	axes.push_back(o2.c->obb.verts[2]);
+	axes.push_back(glm::cross(o1.c->obb.verts[0], o2.c->obb.verts[0]));
+	axes.push_back(glm::cross(o1.c->obb.verts[0], o2.c->obb.verts[1]));
+	axes.push_back(glm::cross(o1.c->obb.verts[0], o2.c->obb.verts[2]));
+	axes.push_back(glm::cross(o1.c->obb.verts[1], o2.c->obb.verts[0]));
+	axes.push_back(glm::cross(o1.c->obb.verts[1], o2.c->obb.verts[1]));
+	axes.push_back(glm::cross(o1.c->obb.verts[1], o2.c->obb.verts[2]));
+	axes.push_back(glm::cross(o1.c->obb.verts[2], o2.c->obb.verts[0]));
+	axes.push_back(glm::cross(o1.c->obb.verts[2], o2.c->obb.verts[1]));
+	axes.push_back(glm::cross(o1.c->obb.verts[2], o2.c->obb.verts[2]));
+	for (const auto& axis : axes) {
+		if (isOverlaping(o1, o2, glm::normalize(axis))) {
+			return;
+		}
+	}
+
+
+}
+
+glm::vec2 PhysicsEngine::projectToAxis(CollisionObject collider, glm::vec3 axis)
+{
+	float min = 1000000;
+	float max = -100000;
+	for (int i = 0; i < 8; i++) {
+		float p = glm::dot(collider.c->obb.verts[i], axis);
+		if (min > p) { min = p; };
+		if (max < p) { max = p; };
+	}
+	return { min,max };
+}
+
+bool PhysicsEngine::isOverlaping(CollisionObject o1, CollisionObject o2, glm::vec3 axis) {
+	glm::vec2 p1 = projectToAxis(o1, axis);
+	glm::vec2 p2 = projectToAxis(o2, axis);
+	return p1.x >= p2.y || p2.x >= p1.y;
 }
 
 
 
-void PhysicsEngine::resolveCollisions(CollResponse c)
+void PhysicsEngine::resolveCollisions()
 {
 
 }
